@@ -18,7 +18,6 @@ os.chdir(current_script_directory)
 
 
 # leave Math comments at end of each game
-
 charRobotron = [(1,4,"#FF0000"), (1,5,"#FFFF00"), (1,6,"#FFFF00"), (1,7,"#FFFF00"), (2,4,"#FF0000"), (2,5,"#FF0000"), (2,11,"#FFFF00"), (3,1,"#90EE90"), (3,2,"#00FFFF"), (3,4,"#FFFFFF"), (3,5,"#FF0000"), (3,6,"#FF0000"), (3,9,"#FF0000"), (3,10,"#FF0000"), (3,11,"#FFFF00"), (4,0,"#FF0000"), (4,1,"#90EE90"), (4,2,"#00FFFF"), (4,3,"#FF0000"), (4,4,"#FF0000"), (4,5,"#FFFFFF"), (4,6,"#FF0000"), (4,7,"#FF0000"), (4,8,"#FF0000"), (4,9,"#FF0000"), (4,10,"#FF0000"), (4,11,"#FFFF00"), (5,0,"#FF0000"), (5,1,"#90EE90"), (5,2,"#00FFFF"), (5,3,"#FF0000"), (5,4,"#FF0000"), (5,5,"#FFFFFF"), (5,6,"#FFFFFF"), (5,7,"#FF0000"), (5,8,"#FF0000"), (6,0,"#FF0000"), (6,1,"#90EE90"), (6,2,"#00FFFF"), (6,3,"#FF0000"), (6,4,"#FF0000"), (6,5,"#FFFFFF"), (6,6,"#FF0000"), (6,7,"#FF0000"), (6,8,"#FF0000"), (6,9,"#FF0000"), (6,10,"#FF0000"), (6,11,"#FFFF00"), (7,1,"#90EE90"), (7,2,"#00FFFF"), (7,4,"#FFFFFF"), (7,5,"#FF0000"), (7,6,"#FF0000"), (7,9,"#FF0000"), (7,10,"#FF0000"), (7,11,"#FFFF00"), (8,4,"#FF0000"), (8,5,"#FF0000"), (8,11,"#FFFF00"), (9,4,"#FF0000"), (9,5,"#FFFF00"), (9,6,"#FFFF00"), (9,7,"#FFFF00")]
 charMan = [(0,3,"#C19153"), (0,4,"#C19153"), (0,5,"#F498EC"), (0,6,"#FFFF00"), (1,3,"#C19153"), (1,4,"#C19153"), (1,5,"#F498EC"), (1,6,"#FFFF00"), (2,2,"#C19153"), (2,3,"#C19153"), (2,9,"#FFFF00"), (3,2,"#C19153"), (3,3,"#C19153"), (3,4,"#C19153"), (3,5,"#C19153"), (3,6,"#C19153"), (3,7,"#C19153"), (3,8,"#C19153"), (3,9,"#FFFF00"), (4,0,"#C19153"), (4,1,"#FFFF00"), (4,2,"#FFFF00"), (4,3,"#C19153"), (4,4,"#FF0000"), (4,5,"#C19153"), (4,6,"#FF0000"), (4,7,"#FF0000"), (4,8,"#C19153"), (4,9,"#FFFF00"), (5,0,"#C19153"), (5,1,"#FFFF00"), (5,2,"#FFFF00"), (5,3,"#FFFF00"), (5,4,"#C19153"), (5,5,"#C19153"), (5,6,"#C19153"), (6,0,"#C19153"), (6,1,"#FFFF00"), (6,2,"#FFFF00"), (6,3,"#FFFF00"), (6,4,"#C19153"), (6,5,"#C19153"), (6,6,"#C19153"), (7,0,"#C19153"), (7,1,"#FFFF00"), (7,2,"#FFFF00"), (7,3,"#C19153"), (7,4,"#FF0000"), (7,5,"#C19153"), (7,6,"#FF0000"), (7,7,"#FF0000"), (7,8,"#C19153"), (7,9,"#FFFF00"), (8,2,"#C19153"), (8,3,"#C19153"), (8,4,"#C19153"), (8,5,"#C19153"), (8,6,"#C19153"), (8,7,"#C19153"), (8,8,"#C19153"), (8,9,"#FFFF00"), (9,2,"#C19153"), (9,3,"#C19153"), (9,9,"#FFFF00"), (10,3,"#C19153"), (10,4,"#C19153"), (10,5,"#F498EC"), (10,6,"#FFFF00"), (11,3,"#C19153"), (11,4,"#C19153"), (11,5,"#F498EC"), (11,6,"#FFFF00")]
 charBullet = [(0,11,"#FFFF00"), (1,11,"#C19153"), (2,11,"#FFFF00"), (3,11,"#FF0000"), (4,11,"#FFFF00"), (5,11,"#C19153"), (6,11,"#F498EC"), (7,11,"#C19153"), (8,11,"#FFFF00"), (9,11,"#FFFF00"), (10,11,"#FF0000"), (11,11,"#FFFF00"), (12,11,"#FFFF00"), (13,11,"#FF0000"), (14,11,"#F498EC"), (15,11,"#FFFF00"), (16,11,"#FF0000"), (17,11,"#FF0000"), (18,11,"#FFFF00"), (19,11,"#F498EC"), (20,11,"#AAAAAA"), (21,11,"#FFFF00"), (22,11,"#C19153"), (23,11,"#FFFF00")]
@@ -79,11 +78,30 @@ def checkcollisionrect(object1,object2):
           return False
      else:
           return True
+     
+def checkcollisionPointsinRect(object1,object2):
+    a1,b1,a2,b2 = object2.collisionrect
+    a1 = a1 + object2.x
+    b1 = b1 + object2.y
+    a2 = a2 + object2.x
+    b2 = b2 + object2.y
+    for p in object1.RotatedCollisionPoints:
+        x1 = p[0]
+        y1 = p[1]
+        x1 = x1 + object1.x
+        y1 = y1 + object1.y
+        if x1 >= a1 and x1 <= a2 and y1 >= b1 and y1 <= b2:
+            return True
+    return False
+        
 
 myship = LEDlib.LEDobj(canvas1,STARTX,STARTY,dx = 0,dy = 0,CharPoints=charMan, pixelsize = 2,typestring = "human")
 myship.collisionrect = (4,3,44,45)
 
-myrobot = LEDlib.LEDobj(canvas1,200,200,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "human")
+myrobot = LEDlib.LEDobj(canvas1,200,200,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "robot")
+myrobot.collisionrect = (0,0,21,25)
+myrobot.collisionrectshow = True
+myrobot.draw()
 
 scoreddisplay = []
 enemylist = []
@@ -135,7 +153,9 @@ def gameloop():
     for bullet in bulletlist:
         bullet.move()
         if bullet.x > MAXx or bullet.x < 0 or bullet.y < 0 or bullet.y > MAXy:
-           bulletstoremove.append(bullet) 
+           bulletstoremove.append(bullet)
+        if checkcollisionPointsinRect(bullet,myrobot):
+            print("hit") 
     for b in bulletstoremove:
            b.undraw()
            bulletlist.remove(b)
@@ -181,7 +201,17 @@ setlevel()
 gameloop()
 reload()
 
-# cannot easily to diagonals
+def makebullet(x,y,dx,dy,rotateangle):
+    global CanFire
+    bullet = LEDlib.LEDobj(canvas1,x,y,dx,dy,CharPoints=charBullet, pixelsize = 2,typestring = "bullet")
+    bullet.CollisionPoints = [(0,11),(10,11),(20,11),(23,11)]
+    bullet.RotatedCollisionPoints = bullet.CollisionPoints.copy()
+    bullet.rotate(rotateangle)
+    bulletlist.append(bullet)
+    CanFire = False
+
+
+# cannot easily do diagonals (only one key at a time is detected, pygame can detect multiple keypresses at once)
 def mykey(event):
     global PlayerAlive,score, highscore, LEVELSTART, CanFire
     key = event.keysym
@@ -194,55 +224,29 @@ def mykey(event):
     elif key == "w":
          myship.y += -STEPD
     elif key == "Up" and CanFire:
-         bullet = LEDlib.LEDobj(canvas1,myship.x-12,myship.y-30,dx = 0,dy = -24,CharPoints=charBullet, pixelsize = 2,typestring = "human")
-         bullet.collisionrect = (0,12,44,13)
-         bullet.rotate(90)
-         bulletlist.append(bullet)
-         CanFire = False
+         makebullet(x=myship.x-12,y=myship.y-30,dx=0,dy=-24,rotateangle=90)
     elif key == "d":
          myship.x += STEPD
     elif key == "Right" and CanFire:
-         bullet = LEDlib.LEDobj(canvas1,myship.x+6,myship.y-12,dx = 24,dy = 0,CharPoints=charBullet, pixelsize = 2,typestring = "human")
-         bullet.collisionrect = (0,12,44,13)
-         bulletlist.append(bullet)
-         CanFire = False
+         makebullet(x=myship.x+6,y=myship.y-12,dx=24,dy=0,rotateangle=0)
     elif key == "a":
          myship.x += -STEPD
     elif key == "Left" and CanFire:
-         bullet = LEDlib.LEDobj(canvas1,myship.x-44,myship.y-12,dx = -24,dy = 0,CharPoints=charBullet, pixelsize = 2,typestring = "human")
-         bullet.collisionrect = (0,12,44,13)
-         bulletlist.append(bullet)
-         CanFire = False
+         makebullet(x=myship.x-44,y=myship.y-12,dx=-24,dy=0,rotateangle=0)
     elif key == "s":
          myship.y += STEPD
     elif key == "Down" and CanFire:
-         bullet = LEDlib.LEDobj(canvas1,myship.x-12,myship.y+24,dx = 0,dy = 24,CharPoints=charBullet, pixelsize = 2,typestring = "human")
-         bullet.collisionrect = (0,12,44,13)
-         bullet.rotate(90)
-         bulletlist.append(bullet)
-         CanFire = False
+         makebullet(x=myship.x-12,y=myship.y+24,dx=0,dy=24,rotateangle=90)
     myship.draw()
        
 # 4 direction shoot when space is pressed (limited ammo)
 def on_space(event):
     global CanFire
-    bullet = LEDlib.LEDobj(canvas1,myship.x+12,myship.y+12,dx = 24,dy = 24,CharPoints=charBullet, pixelsize = 2,typestring = "human")
-    bullet.collisionrect = (0,12,44,13)
-    bullet.rotate(45)
-    bulletlist.append(bullet)
-    bullet = LEDlib.LEDobj(canvas1,myship.x+12,myship.y-36,dx = 24,dy = -24,CharPoints=charBullet, pixelsize = 2,typestring = "human")
-    bullet.collisionrect = (0,12,44,13)
-    bullet.rotate(-45)
-    bulletlist.append(bullet)
-    bullet = LEDlib.LEDobj(canvas1,myship.x-24,myship.y-24,dx = -24,dy = -24,CharPoints=charBullet, pixelsize = 2,typestring = "human")
-    bullet.collisionrect = (0,12,44,13)
-    bullet.rotate(-45-90)
-    bulletlist.append(bullet)
-    bullet = LEDlib.LEDobj(canvas1,myship.x-36,myship.y+12,dx = -24,dy = 24,CharPoints=charBullet, pixelsize = 2,typestring = "human")
-    bullet.collisionrect = (0,12,44,13)
-    bullet.rotate(-45)
-    bulletlist.append(bullet)
-    CanFire = False
+    makebullet(x=myship.x+12,y=myship.y+12,dx=24,dy=24,rotateangle=45)
+    makebullet(x=myship.x+12,y=myship.y-36,dx=24,dy=-24,rotateangle=-45)
+    makebullet(x=myship.x-24,y=myship.y-24,dx=-24,dy=-24,rotateangle=-45-90)
+    makebullet(x=myship.x-36,y=myship.y+12,dx=-24,dy=24,rotateangle=-45)
+
 
 mainwin.bind("<KeyPress>", mykey)
 mainwin.bind("<space>", on_space)

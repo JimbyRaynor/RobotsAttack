@@ -223,6 +223,7 @@ class LEDobj:
          self.CharPoints = CharPoints.copy()
          self.PointsType = 0
          self.collisionrect = (0,0,0,0)  # top left to bottom right
+         self.collisionpoints = [(0,0)]
          self.collisionimage = 0
          self.collisionrectshow = False
          self.pixelsize = pixelsize
