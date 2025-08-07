@@ -223,9 +223,12 @@ class LEDobj:
          self.CharPoints = CharPoints.copy()
          self.PointsType = 0
          self.collisionrect = (0,0,0,0)  # top left to bottom right
-         self.collisionpoints = [(0,0)]
+         self.CollisionPoints = [(0,0,0)]
+         self.RotatedCollisionPoints = [(0,0,0)]
          self.collisionimage = 0
+         self.collisionlinesimage = 0
          self.collisionrectshow = False
+         self.collisionlinesshow = False
          self.pixelsize = pixelsize
          psize = self.pixelsize
          createCharColourSolid(canvas,x,y,CharPoints,self.LEDPoints)
@@ -242,9 +245,12 @@ class LEDobj:
         self.undraw()
         psize = self.pixelsize
         createCharColourSolid(self.canvas,self.x,self.y,self.CharPoints,self.LEDPoints)
+        if self.collisionlinesshow:
+           self.canvas.delete(self.collisionlinesimage)
+           self.showcollisionlines()
         if self.collisionrectshow:
               self.canvas.delete(self.collisionimage)
-              self.showcollisionrect() 
+              self.showcollisionrect()
     def move(self): 
          self.x = self.x + self.dx
          self.y = self.y + self.dy
@@ -253,12 +259,20 @@ class LEDobj:
          centerx = sum(x for x,y,z in self.OriginalCharPoints)/len(self.OriginalCharPoints)
          centery = sum(y for x,y,z in self.OriginalCharPoints)/len(self.OriginalCharPoints)
          self.CharPoints = rotatepoints(self.OriginalCharPoints,angle=angledeg,center=(centerx,centery))
+         self.RotatedCollisionPoints = rotatepoints(self.CollisionPoints,angle=angledeg,center=(centerx,centery))
          self.draw()
     def showcollisionrect(self):
          self.collisionrectshow = True
          x1,y1,x2,y2 = self.collisionrect 
          self.collisionimage = self.canvas.create_rectangle(self.x+x1,self.y+y1,self.x+x2,self.y+y2,fill="", outline = "white") 
-      
+    def showcollisionlines(self):
+         self.collisionlinesshow = True
+         flatpoints = []
+         for x,y,z in self.RotatedCollisionPoints:
+            x1 = x*self.pixelsize + self.x
+            y1 = y*self.pixelsize + self.y
+            flatpoints.append((x1,y1))
+         self.collisionlinesimage = self.canvas.create_polygon(flatpoints, outline="white", width=2)
 
 class LEDscoreobj:
     def __init__(self, canvas,x=0,y=0, score = 0, colour = "white", pixelsize = 2, charwidth=23, numzeros = 0, solid = False, bg = True):

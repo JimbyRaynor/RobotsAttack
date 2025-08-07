@@ -14,6 +14,9 @@ os.chdir(current_script_directory)
 # TODO
 # auto move from closest enemy
 # teleporters
+# ammo packs?
+# zerg?
+# Jim Raynor?
 
 
 
@@ -79,17 +82,15 @@ def checkcollisionrect(object1,object2):
      else:
           return True
      
-def checkcollisionPointsinRect(object1,object2):
+def checkcollisionPointsinRect(object1,object2,pixelsize):
     a1,b1,a2,b2 = object2.collisionrect
     a1 = a1 + object2.x
     b1 = b1 + object2.y
     a2 = a2 + object2.x
     b2 = b2 + object2.y
     for p in object1.RotatedCollisionPoints:
-        x1 = p[0]
-        y1 = p[1]
-        x1 = x1 + object1.x
-        y1 = y1 + object1.y
+        x1 = p[0]*pixelsize + object1.x
+        y1 = p[1]*pixelsize + object1.y
         if x1 >= a1 and x1 <= a2 and y1 >= b1 and y1 <= b2:
             return True
     return False
@@ -147,15 +148,18 @@ def eraseplayfield():
            item.undraw()
         itemlist.clear()
     
+hitcounter = 0
+
 def gameloop():
-    global  score, highscore
+    global  score, highscore, hitcounter
     bulletstoremove = []
     for bullet in bulletlist:
         bullet.move()
         if bullet.x > MAXx or bullet.x < 0 or bullet.y < 0 or bullet.y > MAXy:
            bulletstoremove.append(bullet)
-        if checkcollisionPointsinRect(bullet,myrobot):
-            print("hit") 
+        if checkcollisionPointsinRect(bullet,myrobot,myrobot.pixelsize):
+            hitcounter += 1
+            print("hit",hitcounter) 
     for b in bulletstoremove:
            b.undraw()
            bulletlist.remove(b)
@@ -204,9 +208,10 @@ reload()
 def makebullet(x,y,dx,dy,rotateangle):
     global CanFire
     bullet = LEDlib.LEDobj(canvas1,x,y,dx,dy,CharPoints=charBullet, pixelsize = 2,typestring = "bullet")
-    bullet.CollisionPoints = [(0,11),(10,11),(20,11),(23,11)]
+    bullet.CollisionPoints = [(0,11,0),(10,11,0),(20,11,0),(24,11,0)] # z is colour (ignored) for rotation
     bullet.RotatedCollisionPoints = bullet.CollisionPoints.copy()
     bullet.rotate(rotateangle)
+    #bullet.showcollisionlines()
     bulletlist.append(bullet)
     CanFire = False
 
@@ -214,7 +219,7 @@ def makebullet(x,y,dx,dy,rotateangle):
 # cannot easily do diagonals (only one key at a time is detected, pygame can detect multiple keypresses at once)
 def mykey(event):
     global PlayerAlive,score, highscore, LEVELSTART, CanFire
-    key = event.keysym
+    key = event.keysym.lower()
     if key in "0123456789":
         undrawtitle()
         if key == "0":
@@ -223,19 +228,19 @@ def mykey(event):
         setlevel()
     elif key == "w":
          myship.y += -STEPD
-    elif key == "Up" and CanFire:
+    elif key == "up" and CanFire:
          makebullet(x=myship.x-12,y=myship.y-30,dx=0,dy=-24,rotateangle=90)
     elif key == "d":
          myship.x += STEPD
-    elif key == "Right" and CanFire:
+    elif key == "right" and CanFire:
          makebullet(x=myship.x+6,y=myship.y-12,dx=24,dy=0,rotateangle=0)
     elif key == "a":
          myship.x += -STEPD
-    elif key == "Left" and CanFire:
+    elif key == "left" and CanFire:
          makebullet(x=myship.x-44,y=myship.y-12,dx=-24,dy=0,rotateangle=0)
     elif key == "s":
          myship.y += STEPD
-    elif key == "Down" and CanFire:
+    elif key == "down" and CanFire:
          makebullet(x=myship.x-12,y=myship.y+24,dx=0,dy=24,rotateangle=90)
     myship.draw()
        
