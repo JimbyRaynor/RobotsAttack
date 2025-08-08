@@ -2,6 +2,7 @@ import math
 import sys
 import os
 import time
+import random
 from tkinter import * 
 
 sys.path.insert(0, "/home/deck/Documents") # needed to load LEDlib
@@ -12,7 +13,8 @@ current_script_directory = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_script_directory)
 
 # TODO
-# auto move from closest enemy
+# move enemy
+# mikey
 # teleporters
 # ammo packs?
 # zerg?
@@ -45,6 +47,49 @@ score = 0
 highscore = 0
 PlayerAlive = False
 CanFire = True
+
+
+class SplitCharobj: # this object splits a char into two, lasting timealive milliseconds
+    def __init__(self,mainwin, canvas,myChar,pixelsize,offset,x=0,y=0,dx=0,dy=0,timealive=1000):
+        self.CharPoints = self.split(myChar,offset)
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.CanMove = True
+        self.LEDPoints = []        
+        self.pixelsize = pixelsize
+        self.canvas = canvas
+        self.mainwin = mainwin
+        self.currentindex = 0
+        self.timealive = timealive
+        self.mainwin.after(self.timealive,self.remove)
+        self.move()
+    def split(self,myChar,offset):
+        newChar = []
+        for x,y,z in myChar:
+            if y % 2 == offset:
+                newChar.append((x,y,z))
+        return newChar
+    def undraw(self):
+        for p in self.LEDPoints:
+            self.canvas.delete(p)
+        self.LEDPoints.clear()
+    def draw(self):
+        self.undraw()
+        LEDlib.psize = self.pixelsize
+        LEDlib.createCharColourSolid(self.canvas,self.x,self.y,self.CharPoints,self.LEDPoints)
+    def move(self):
+        if self.CanMove:
+           self.x = self.x + self.dx
+           self.y = self.y + self.dy
+           self.draw()
+           self.mainwin.after(20,self.move) # move every 20 ms
+    def remove(self):
+        self.CanMove = False
+        self.undraw()
+        del self
+           
 
 
 
@@ -99,10 +144,15 @@ def checkcollisionPointsinRect(object1,object2,pixelsize):
 myship = LEDlib.LEDobj(canvas1,STARTX,STARTY,dx = 0,dy = 0,CharPoints=charMan, pixelsize = 2,typestring = "human")
 myship.collisionrect = (4,3,44,45)
 
-myrobot = LEDlib.LEDobj(canvas1,200,200,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "robot")
-myrobot.collisionrect = (0,0,21,25)
-myrobot.collisionrectshow = True
-myrobot.draw()
+robotlist = []
+for i in range(20):
+    x = random.randint(20,MAXx)
+    y = random.randint(20,MAXy)
+    myrobot = LEDlib.LEDobj(canvas1,x,y,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "robot")
+    myrobot.collisionrect = (0,0,21,25)
+    #myrobot.showcollisionrect()
+    robotlist.append(myrobot)
+
 
 scoreddisplay = []
 enemylist = []
@@ -153,17 +203,27 @@ hitcounter = 0
 def gameloop():
     global  score, highscore, hitcounter
     bulletstoremove = []
+    robotstoremove = []
     for bullet in bulletlist:
-        bullet.move()
         if bullet.x > MAXx or bullet.x < 0 or bullet.y < 0 or bullet.y > MAXy:
            bulletstoremove.append(bullet)
-        if checkcollisionPointsinRect(bullet,myrobot,myrobot.pixelsize):
-            hitcounter += 1
-            print("hit",hitcounter) 
+        for myrobot in robotlist:
+           if checkcollisionPointsinRect(bullet,myrobot,myrobot.pixelsize):
+              SplitCharobj(mainwin, canvas1,myrobot.CharPoints,myrobot.pixelsize,offset=0,x=myrobot.x,y=myrobot.y,dx=0,dy=8,timealive=1000)
+              SplitCharobj(mainwin, canvas1,myrobot.CharPoints,myrobot.pixelsize,offset=1,x=myrobot.x,y=myrobot.y,dx=0,dy=-8,timealive=1000)
+              robotstoremove.append(myrobot)
+              bulletstoremove.append(bullet)
+        bullet.move()
     for b in bulletstoremove:
-           b.undraw()
-           bulletlist.remove(b)
-           del b
+           if b in bulletlist: # b could have been added more than once to bulletstoremove, if it hits multiple enemies
+             b.undraw()
+             bulletlist.remove(b)
+             del b
+    for r in robotstoremove:
+           if r in robotlist:
+             r.undraw()
+             robotlist.remove(r)
+             del r      
     for fruit in enemylist:
        if checkcollisionrect(myship,fruit):
             pointsawarded = LEDlib.LEDscoreobj(canvas1,x=fruit.x-7,y=fruit.y+10,score=fruit.PointsType,colour="yellow",pixelsize=2, charwidth = 15, solid = True, bg = False)
@@ -208,7 +268,7 @@ reload()
 def makebullet(x,y,dx,dy,rotateangle):
     global CanFire
     bullet = LEDlib.LEDobj(canvas1,x,y,dx,dy,CharPoints=charBullet, pixelsize = 2,typestring = "bullet")
-    bullet.CollisionPoints = [(0,11,0),(10,11,0),(20,11,0),(24,11,0)] # z is colour (ignored) for rotation
+    bullet.CollisionPoints = [(0,11,0),(5,11,0),(10,11,0),(15,11,0),(20,11,0),(24,11,0)] # z is colour (ignored) for rotation
     bullet.RotatedCollisionPoints = bullet.CollisionPoints.copy()
     bullet.rotate(rotateangle)
     #bullet.showcollisionlines()

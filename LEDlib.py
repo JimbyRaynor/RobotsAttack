@@ -212,6 +212,7 @@ def rotatepoints(points,angle,center):
 class LEDobj:
     def __init__(self, canvas,x=0,y=0,dx=0,dy=0, CharPoints = [], pixelsize = 2, typestring = "unknown"):
          global psize
+         self.alive = True
          self.x = x
          self.y = y
          self.dx = dx
