@@ -13,7 +13,7 @@ current_script_directory = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_script_directory)
 
 # TODO
-# move enemy
+# move enemy/ collision
 # mikey
 # teleporters
 # ammo packs?
@@ -47,6 +47,7 @@ score = 0
 highscore = 0
 PlayerAlive = False
 CanFire = True
+RobotSpeed = 0.2
 
 
 class SplitCharobj: # this object splits a char into two, lasting timealive milliseconds
@@ -142,22 +143,14 @@ def checkcollisionPointsinRect(object1,object2,pixelsize):
         
 
 myship = LEDlib.LEDobj(canvas1,STARTX,STARTY,dx = 0,dy = 0,CharPoints=charMan, pixelsize = 2,typestring = "human")
-myship.collisionrect = (4,3,44,45)
-
-robotlist = []
-for i in range(20):
-    x = random.randint(20,MAXx)
-    y = random.randint(20,MAXy)
-    myrobot = LEDlib.LEDobj(canvas1,x,y,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "robot")
-    myrobot.collisionrect = (0,0,21,25)
-    #myrobot.showcollisionrect()
-    robotlist.append(myrobot)
-
+myship.collisionrect = (2,2,20,18)
+#myship.showcollisionrect()
 
 scoreddisplay = []
 enemylist = []
 solidlist = []
 bulletlist = []
+robotlist = []
       
 displayscore = LEDlib.LEDscoreobj(canvas1,x=210,y=10,score=0,colour="white",pixelsize=3, charwidth = 24,numzeros=5)
 displaytextscore = LEDlib.LEDtextobj(canvas1,x=235,y=35,text="SCORE",colour="yellow",pixelsize = 2, charwidth=14, solid = True)
@@ -184,13 +177,13 @@ def undrawtitle():
     line1text.undraw()
 
 def createplayfield():
-    print("Make enemy robots and walls")
-    #if stype == strawberrytype:
-    #      fruit = LEDobj(canvas1,x*wallsize+8,y*wallsize+DOWNOFFSET,dx = 0,dy = 0,CharPoints=charPacmanStrawberry, pixelsize = 2,typestring = "fruit")
-    #      fruit.collisionrect = (0,6,22,30)
-    #      fruit.PointsType = 200
-    #      #fruit.showcollisionrect()
-    #      fruitlist.append(fruit)
+    for i in range(20):
+      x = random.randint(20,MAXx)
+      y = random.randint(20,MAXy)
+      myrobot = LEDlib.LEDobj(canvas1,x,y,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "robot")
+      myrobot.collisionrect = (0,0,21,25)
+      #myrobot.showcollisionrect()
+      robotlist.append(myrobot)
 
 def eraseplayfield():
     for itemlist in (enemylist, solidlist, scoreddisplay):
@@ -200,8 +193,20 @@ def eraseplayfield():
     
 hitcounter = 0
 
+def moverobots():
+    for r in robotlist:
+        if r.x < myship.x:
+            r.x = r.x + RobotSpeed
+        if r.y < myship.y:
+            r.y = r.y + RobotSpeed
+        if r.x > myship.x:
+            r.x = r.x - RobotSpeed
+        if r.y > myship.y:
+            r.y = r.y - RobotSpeed
+        r.draw()
+
 def gameloop():
-    global  score, highscore, hitcounter
+    global  score, highscore, hitcounter, PlayerAlive, RobotSpeed
     bulletstoremove = []
     robotstoremove = []
     for bullet in bulletlist:
@@ -212,8 +217,18 @@ def gameloop():
               SplitCharobj(mainwin, canvas1,myrobot.CharPoints,myrobot.pixelsize,offset=0,x=myrobot.x,y=myrobot.y,dx=0,dy=8,timealive=1000)
               SplitCharobj(mainwin, canvas1,myrobot.CharPoints,myrobot.pixelsize,offset=1,x=myrobot.x,y=myrobot.y,dx=0,dy=-8,timealive=1000)
               robotstoremove.append(myrobot)
-              bulletstoremove.append(bullet)
+              bulletstoremove.append(bullet) 
+              RobotSpeed = RobotSpeed + 0.2  
+              score = score + 10
+              if score > highscore: 
+                highscore = score
+                displayhighscore.update(highscore)
+              displayscore.update(score)   
         bullet.move()
+    for myrobot in robotlist:
+        if checkcollisionrect(myship,myrobot):
+              print("collision")  
+              PlayerAlive = False
     for b in bulletstoremove:
            if b in bulletlist: # b could have been added more than once to bulletstoremove, if it hits multiple enemies
              b.undraw()
@@ -240,6 +255,7 @@ def gameloop():
             myship.dx = 0
             myship.dy = 0
             break # exit the for loop
+    moverobots()
     mainwin.after(30,gameloop)
 
 def setlevel():
@@ -286,7 +302,8 @@ def mykey(event):
             displaytitle()
         LEVELSTART = int(key)
         setlevel()
-    elif key == "w":
+    if not PlayerAlive: return
+    if key == "w":
          myship.y += -STEPD
     elif key == "up" and CanFire:
          makebullet(x=myship.x-12,y=myship.y-30,dx=0,dy=-24,rotateangle=90)
@@ -306,7 +323,7 @@ def mykey(event):
        
 # 4 direction shoot when space is pressed (limited ammo)
 def on_space(event):
-    global CanFire
+    if not PlayerAlive or not CanFire: return
     makebullet(x=myship.x+12,y=myship.y+12,dx=24,dy=24,rotateangle=45)
     makebullet(x=myship.x+12,y=myship.y-36,dx=24,dy=-24,rotateangle=-45)
     makebullet(x=myship.x-24,y=myship.y-24,dx=-24,dy=-24,rotateangle=-45-90)
