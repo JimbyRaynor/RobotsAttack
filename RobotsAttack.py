@@ -15,7 +15,8 @@ current_script_directory = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_script_directory)
 
 # TODO
-# mikey
+# mikey - make SparkScoreObj and move Mikey, etc
+# New font? Look at robotron temp score displays 1000, etc
 # teleporters
 # ammo packs?
 # zerg?
@@ -76,7 +77,7 @@ class SplitCharobj: # this object splits a char into two, lasting timealive mill
         newChar = []
         for x,y,z in myChar:
             if y % 2 == offset:
-                newChar.append((x,y,z))
+                newChar.append((x,y*4,z))
         return newChar
     def undraw(self):
         for p in self.LEDPoints:
@@ -86,6 +87,47 @@ class SplitCharobj: # this object splits a char into two, lasting timealive mill
         self.undraw()
         LEDlib.psize = self.pixelsize
         LEDlib.createCharColourSolid(self.canvas,self.x,self.y,self.CharPoints,self.LEDPoints)
+    def move(self):
+        if self.CanMove:
+           self.x = self.x + self.dx
+           self.y = self.y + self.dy
+           self.draw()
+           self.mainwin.after(20,self.move) # move every 20 ms
+    def remove(self):
+        self.CanMove = False
+        self.undraw()
+        del self
+
+class SparkScoreObj: # for displaying temporary score displays (when awarding points)
+    def __init__(self,mainwin, canvas,x=0,y=0,score = 0, colour = "white",pixelsize =2, charwidth = 24, numzeros = 4,solid=False,bg = True,dx=0,dy=0,timealive=1000):
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.colour = colour
+        self.score = score
+        self.CanMove = True
+        self.numzeros = numzeros
+        self.LEDPoints = []        
+        self.pixelsize = pixelsize
+        self.canvas = canvas
+        self.mainwin = mainwin
+        self.charwidth = charwidth
+        self.solid = solid
+        self.bg = bg
+        self.currentindex = 0
+        self.timealive = timealive
+        self.mainwin.after(self.timealive,self.remove)
+        self.move()
+    def undraw(self):
+        for p in self.LEDPoints:
+            self.canvas.delete(p)
+        self.LEDPoints.clear()
+    def draw(self):
+        self.undraw()
+        LEDlib.psize = self.pixelsize
+        LEDlib.charwidth = self.charwidth
+        LEDlib.ShowColourScore2(self.canvas,self.x,self.y,self.colour,self.score,self.LEDPoints,self.numzeros,self.solid,self.bg)
     def move(self):
         if self.CanMove:
            self.x = self.x + self.dx
@@ -220,8 +262,8 @@ def gameloop():
            bulletstoremove.append(bullet)
         for myrobot in robotlist:
            if checkcollisionPointsinRect(bullet,myrobot,myrobot.pixelsize):
-              SplitCharobj(mainwin, canvas1,myrobot.CharPoints,myrobot.pixelsize,offset=0,x=myrobot.x,y=myrobot.y,dx=0,dy=8,timealive=1000)
-              SplitCharobj(mainwin, canvas1,myrobot.CharPoints,myrobot.pixelsize,offset=1,x=myrobot.x,y=myrobot.y,dx=0,dy=-8,timealive=1000)
+              SplitCharobj(mainwin, canvas1,myrobot.CharPoints,myrobot.pixelsize,offset=0,x=myrobot.x,y=myrobot.y,dx=-bullet.dy,dy=bullet.dx,timealive=500)
+              SplitCharobj(mainwin, canvas1,myrobot.CharPoints,myrobot.pixelsize,offset=1,x=myrobot.x,y=myrobot.y,dx=bullet.dy,dy=-bullet.dx,timealive=500)
               robotstoremove.append(myrobot)
               bulletstoremove.append(bullet) 
               RobotSpeed = RobotSpeed + 0.2 
@@ -247,8 +289,9 @@ def gameloop():
              del r      
     for human in humanlist:
        if checkcollisionrect(myship,human):
-            pointsawarded = LEDlib.LEDscoreobj(canvas1,x=human.x-7,y=human.y+10,score=bonusscore,colour="yellow",pixelsize=1, charwidth = 8, solid = True, bg = False)
-            scoreddisplay.append(pointsawarded)
+            #pointsawarded = LEDlib.LEDscoreobj(canvas1,x=human.x-7,y=human.y+10,score=bonusscore,colour="yellow",pixelsize=1, charwidth = 8, solid = True, bg = False)
+            tempdisplay = SparkScoreObj(mainwin,canvas1,x=human.x-7,y=human.y+10,score = bonusscore, colour = "red", pixelsize = 1, charwidth = 8, solid = True,bg=False,dx=0,dy=-1,timealive=1000)
+            #scoreddisplay.append(pointsawarded)
             human.undraw()
             humanlist.remove(human)
             score = score + bonusscore
