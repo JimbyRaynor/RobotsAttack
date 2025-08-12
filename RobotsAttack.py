@@ -5,30 +5,35 @@ import time
 import random
 from tkinter import * 
 
-sys.path.insert(0, "/home/deck/Documents") # needed to load LEDlib
+
+sys.path.insert(0, "/home/deck/Documents") # needed to load LEDlib and Highscorelib
 import LEDlib
+import Highscorelib
 
 # for loading files (.png, .txt), set current directory = location of this python script (needed for Linux)
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_script_directory)
 
 # TODO
-# move enemy/ collision
 # mikey
 # teleporters
 # ammo packs?
 # zerg?
 # Jim Raynor?
+# Convert to PyGame, with sound, then GameMaker
 
 
 
 # leave Math comments at end of each game
 charRobotron = [(1,4,"#FF0000"), (1,5,"#FFFF00"), (1,6,"#FFFF00"), (1,7,"#FFFF00"), (2,4,"#FF0000"), (2,5,"#FF0000"), (2,11,"#FFFF00"), (3,1,"#90EE90"), (3,2,"#00FFFF"), (3,4,"#FFFFFF"), (3,5,"#FF0000"), (3,6,"#FF0000"), (3,9,"#FF0000"), (3,10,"#FF0000"), (3,11,"#FFFF00"), (4,0,"#FF0000"), (4,1,"#90EE90"), (4,2,"#00FFFF"), (4,3,"#FF0000"), (4,4,"#FF0000"), (4,5,"#FFFFFF"), (4,6,"#FF0000"), (4,7,"#FF0000"), (4,8,"#FF0000"), (4,9,"#FF0000"), (4,10,"#FF0000"), (4,11,"#FFFF00"), (5,0,"#FF0000"), (5,1,"#90EE90"), (5,2,"#00FFFF"), (5,3,"#FF0000"), (5,4,"#FF0000"), (5,5,"#FFFFFF"), (5,6,"#FFFFFF"), (5,7,"#FF0000"), (5,8,"#FF0000"), (6,0,"#FF0000"), (6,1,"#90EE90"), (6,2,"#00FFFF"), (6,3,"#FF0000"), (6,4,"#FF0000"), (6,5,"#FFFFFF"), (6,6,"#FF0000"), (6,7,"#FF0000"), (6,8,"#FF0000"), (6,9,"#FF0000"), (6,10,"#FF0000"), (6,11,"#FFFF00"), (7,1,"#90EE90"), (7,2,"#00FFFF"), (7,4,"#FFFFFF"), (7,5,"#FF0000"), (7,6,"#FF0000"), (7,9,"#FF0000"), (7,10,"#FF0000"), (7,11,"#FFFF00"), (8,4,"#FF0000"), (8,5,"#FF0000"), (8,11,"#FFFF00"), (9,4,"#FF0000"), (9,5,"#FFFF00"), (9,6,"#FFFF00"), (9,7,"#FFFF00")]
+charRobotron2 = [(0,5,"#FFFFFF"), (0,6,"#FFFFFF"), (0,8,"#FF0000"), (0,9,"#FFFFFF"), (1,0,"#FF0000"), (1,1,"#FF0000"), (1,2,"#FF0000"), (1,4,"#FF0000"), (1,5,"#FF0000"), (1,6,"#FFFFFF"), (1,7,"#FF0000"), (1,9,"#FFFFFF"), (2,0,"#FF0000"), (2,1,"#FF0000"), (2,2,"#FF0000"), (2,3,"#FF0000"), (2,4,"#FF0000"), (2,5,"#FF0000"), (2,6,"#FF0000"), (3,0,"#FF0000"), (3,1,"#FFFFFF"), (3,2,"#FF0000"), (3,4,"#FF0000"), (3,5,"#FF0000"), (3,7,"#FF0000"), (3,8,"#FF0000"), (3,9,"#FFFFFF"), (4,0,"#FF0000"), (4,1,"#FFFFFF"), (4,2,"#FF0000"), (4,4,"#FF0000"), (4,5,"#FF0000"), (4,6,"#FFFFFF"), (4,9,"#FFFFFF"), (5,6,"#FFFFFF")]
+charRobotron3 = [(1,8,"#AAAAAA"), (1,9,"#AAAAAA"), (1,10,"#AAAAAA"), (2,4,"#0000FF"), (2,5,"#0000FF"), (2,6,"#0000FF"), (2,7,"#FF0000"), (2,8,"#AAAAAA"), (2,9,"#AAAAAA"), (2,10,"#AAAAAA"), (3,0,"#FFFF00"), (3,1,"#FFFF00"), (3,2,"#FFFF00"), (3,3,"#0000FF"), (3,4,"#0000FF"), (3,5,"#0000FF"), (3,6,"#0000FF"), (3,7,"#0000FF"), (3,8,"#0000FF"), (3,9,"#0000FF"), (3,10,"#0000FF"), (3,11,"#FF0000"), (4,0,"#FFFF00"), (4,1,"#FF0000"), (4,2,"#FF0000"), (4,3,"#0000FF"), (4,4,"#0000FF"), (4,5,"#0000FF"), (4,6,"#0000FF"), (4,7,"#0000FF"), (4,8,"#0000FF"), (4,9,"#AAAAAA"), (4,10,"#AAAAAA"), (4,11,"#FF0000"), (5,0,"#FF0000"), (5,1,"#FFFFFF"), (5,2,"#FF0000"), (5,3,"#0000FF"), (5,4,"#0000FF"), (5,5,"#0000FF"), (5,6,"#0000FF"), (5,7,"#0000FF"), (5,8,"#0000FF"), (5,9,"#AAAAAA"), (5,10,"#AAAAAA"), (6,0,"#FF0000"), (6,1,"#FFFFFF"), (6,2,"#FF0000"), (6,3,"#0000FF"), (6,4,"#0000FF"), (6,5,"#0000FF"), (6,6,"#0000FF"), (6,7,"#0000FF"), (6,8,"#0000FF"), (6,9,"#0000FF"), (6,10,"#0000FF"), (6,11,"#FF0000"), (7,6,"#0000FF"), (7,7,"#FF0000"), (7,9,"#0000FF"), (7,10,"#0000FF"), (7,11,"#FF0000"), (8,6,"#0000FF"), (8,7,"#FF0000"), (8,11,"#FF0000")]
+charRobotron4 = [(1,3,"#FFFF00"), (1,7,"#FFFFFF"), (1,8,"#F498EC"), (2,1,"#FFFF00"), (2,2,"#FFFF00"), (2,3,"#FFFF00"), (2,4,"#F498EC"), (2,5,"#F498EC"), (2,6,"#F498EC"), (2,7,"#F498EC"), (2,8,"#F498EC"), (2,9,"#FFFFFF"), (2,10,"#FFFFFF"), (2,11,"#FFFFFF"), (2,12,"#F498EC"), (3,0,"#FFFF00"), (3,1,"#FFFF00"), (3,2,"#FF0000"), (3,3,"#FF0000"), (3,4,"#F498EC"), (3,5,"#F498EC"), (3,6,"#F498EC"), (3,7,"#F498EC"), (3,8,"#F498EC"), (3,9,"#FFFFFF"), (3,10,"#FFFFFF"), (3,11,"#FFFFFF"), (3,12,"#F498EC"), (4,0,"#FFFF00"), (4,1,"#FF0000"), (4,2,"#90EE90"), (4,3,"#FF0000"), (4,4,"#F498EC"), (4,5,"#FF5900"), (4,6,"#FF5900"), (4,7,"#F498EC"), (4,8,"#90EE90"), (4,9,"#90EE90"), (5,0,"#FFFF00"), (5,1,"#FF0000"), (5,2,"#90EE90"), (5,3,"#FF0000"), (5,5,"#FF5900"), (5,6,"#FF5900"), (5,7,"#FFFFFF"), (5,8,"#90EE90"), (5,9,"#90EE90"), (5,10,"#FFFFFF"), (5,11,"#FFFFFF"), (5,12,"#F498EC"), (6,6,"#FF5900"), (6,7,"#FFFFFF"), (6,8,"#90EE90"), (6,9,"#90EE90"), (6,10,"#FFFFFF"), (6,11,"#FFFFFF"), (6,12,"#F498EC"), (7,8,"#90EE90"), (7,9,"#90EE90"), (7,12,"#F498EC")]
+
 charMan = [(0,3,"#C19153"), (0,4,"#C19153"), (0,5,"#F498EC"), (0,6,"#FFFF00"), (1,3,"#C19153"), (1,4,"#C19153"), (1,5,"#F498EC"), (1,6,"#FFFF00"), (2,2,"#C19153"), (2,3,"#C19153"), (2,9,"#FFFF00"), (3,2,"#C19153"), (3,3,"#C19153"), (3,4,"#C19153"), (3,5,"#C19153"), (3,6,"#C19153"), (3,7,"#C19153"), (3,8,"#C19153"), (3,9,"#FFFF00"), (4,0,"#C19153"), (4,1,"#FFFF00"), (4,2,"#FFFF00"), (4,3,"#C19153"), (4,4,"#FF0000"), (4,5,"#C19153"), (4,6,"#FF0000"), (4,7,"#FF0000"), (4,8,"#C19153"), (4,9,"#FFFF00"), (5,0,"#C19153"), (5,1,"#FFFF00"), (5,2,"#FFFF00"), (5,3,"#FFFF00"), (5,4,"#C19153"), (5,5,"#C19153"), (5,6,"#C19153"), (6,0,"#C19153"), (6,1,"#FFFF00"), (6,2,"#FFFF00"), (6,3,"#FFFF00"), (6,4,"#C19153"), (6,5,"#C19153"), (6,6,"#C19153"), (7,0,"#C19153"), (7,1,"#FFFF00"), (7,2,"#FFFF00"), (7,3,"#C19153"), (7,4,"#FF0000"), (7,5,"#C19153"), (7,6,"#FF0000"), (7,7,"#FF0000"), (7,8,"#C19153"), (7,9,"#FFFF00"), (8,2,"#C19153"), (8,3,"#C19153"), (8,4,"#C19153"), (8,5,"#C19153"), (8,6,"#C19153"), (8,7,"#C19153"), (8,8,"#C19153"), (8,9,"#FFFF00"), (9,2,"#C19153"), (9,3,"#C19153"), (9,9,"#FFFF00"), (10,3,"#C19153"), (10,4,"#C19153"), (10,5,"#F498EC"), (10,6,"#FFFF00"), (11,3,"#C19153"), (11,4,"#C19153"), (11,5,"#F498EC"), (11,6,"#FFFF00")]
 charBullet = [(0,11,"#FFFF00"), (1,11,"#C19153"), (2,11,"#FFFF00"), (3,11,"#FF0000"), (4,11,"#FFFF00"), (5,11,"#C19153"), (6,11,"#F498EC"), (7,11,"#C19153"), (8,11,"#FFFF00"), (9,11,"#FFFF00"), (10,11,"#FF0000"), (11,11,"#FFFF00"), (12,11,"#FFFF00"), (13,11,"#FF0000"), (14,11,"#F498EC"), (15,11,"#FFFF00"), (16,11,"#FF0000"), (17,11,"#FF0000"), (18,11,"#FFFF00"), (19,11,"#F498EC"), (20,11,"#AAAAAA"), (21,11,"#FFFF00"), (22,11,"#C19153"), (23,11,"#FFFF00")]
 
-
-STEPD = 6 # speed of characters. This changes dx,dy.
+STEPD = 6 # speed of ship. This changes dx,dy.
 
 MAXx = 800
 MAXy = 600
@@ -44,7 +49,8 @@ canvas1 = Canvas(mainwin,width=MAXx,height= MAXy,bg="black")
 canvas1.place(x=0,y=0)
 
 score = 0
-highscore = 0
+bonusscore = 1000
+highscore = Highscorelib.load_high_score("highscore.txt")
 PlayerAlive = False
 CanFire = True
 RobotSpeed = 0.2
@@ -90,25 +96,10 @@ class SplitCharobj: # this object splits a char into two, lasting timealive mill
         self.CanMove = False
         self.undraw()
         del self
-           
-
-
-
-def save_high_score(myhighscore, filename=""):
-    filename="highscore.txt"
-    with open(filename, "w") as file:  # file is automatically closed when with block is completed
-        file.write(str(myhighscore))
-
-def load_high_score(filename=""):
-    filename="highscore.txt"
-    try:
-        with open(filename, "r") as file:  # file is automatically closed when with block is completed
-            return int(file.read())
-    except FileNotFoundError:
-        return 0  # Default to 0 if no high score file exists
+        
     
 def on_close():
-    save_high_score(highscore)  # Save score before exiting
+    Highscorelib.save_high_score(highscore,"highscore.txt")  # Save high score before exiting
     mainwin.destroy()  # Close the window
 mainwin.protocol("WM_DELETE_WINDOW", on_close)  # Bind closing action
        
@@ -146,11 +137,13 @@ myship = LEDlib.LEDobj(canvas1,STARTX,STARTY,dx = 0,dy = 0,CharPoints=charMan, p
 myship.collisionrect = (2,2,20,18)
 #myship.showcollisionrect()
 
+
 scoreddisplay = []
 enemylist = []
 solidlist = []
 bulletlist = []
 robotlist = []
+humanlist  = []
       
 displayscore = LEDlib.LEDscoreobj(canvas1,x=210,y=10,score=0,colour="white",pixelsize=3, charwidth = 24,numzeros=5)
 displaytextscore = LEDlib.LEDtextobj(canvas1,x=235,y=35,text="SCORE",colour="yellow",pixelsize = 2, charwidth=14, solid = True)
@@ -177,13 +170,26 @@ def undrawtitle():
     line1text.undraw()
 
 def createplayfield():
-    for i in range(20):
+    for i in range(8):
       x = random.randint(20,MAXx)
       y = random.randint(20,MAXy)
       myrobot = LEDlib.LEDobj(canvas1,x,y,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "robot")
       myrobot.collisionrect = (0,0,21,25)
       #myrobot.showcollisionrect()
       robotlist.append(myrobot)
+    Mikey = LEDlib.LEDobj(canvas1,100,210,dx = 0,dy = 0,CharPoints=charRobotron2, pixelsize = 2,typestring = "human")
+    Mikey.collisionrect = (0,0,12,19)
+    #Mikey.showcollisionrect()
+    Father = LEDlib.LEDobj(canvas1,100,310,dx = 0,dy = 0,CharPoints=charRobotron3, pixelsize = 2,typestring = "human")
+    Father.collisionrect = (0,0,17,24)
+    #Father.showcollisionrect()
+    Mother = LEDlib.LEDobj(canvas1,100,410,dx = 0,dy = 0,CharPoints=charRobotron4, pixelsize = 2,typestring = "human")
+    Mother.collisionrect = (0,0,17,25)
+    #Mother.showcollisionrect()
+    humanlist.append(Mikey)
+    humanlist.append(Father)
+    humanlist.append(Mother)
+
 
 def eraseplayfield():
     for itemlist in (enemylist, solidlist, scoreddisplay):
@@ -206,7 +212,7 @@ def moverobots():
         r.draw()
 
 def gameloop():
-    global  score, highscore, hitcounter, PlayerAlive, RobotSpeed
+    global  score, highscore, hitcounter, PlayerAlive, RobotSpeed, bonusscore
     bulletstoremove = []
     robotstoremove = []
     for bullet in bulletlist:
@@ -218,7 +224,7 @@ def gameloop():
               SplitCharobj(mainwin, canvas1,myrobot.CharPoints,myrobot.pixelsize,offset=1,x=myrobot.x,y=myrobot.y,dx=0,dy=-8,timealive=1000)
               robotstoremove.append(myrobot)
               bulletstoremove.append(bullet) 
-              RobotSpeed = RobotSpeed + 0.2  
+              RobotSpeed = RobotSpeed + 0.2 
               score = score + 10
               if score > highscore: 
                 highscore = score
@@ -239,13 +245,15 @@ def gameloop():
              r.undraw()
              robotlist.remove(r)
              del r      
-    for fruit in enemylist:
-       if checkcollisionrect(myship,fruit):
-            pointsawarded = LEDlib.LEDscoreobj(canvas1,x=fruit.x-7,y=fruit.y+10,score=fruit.PointsType,colour="yellow",pixelsize=2, charwidth = 15, solid = True, bg = False)
+    for human in humanlist:
+       if checkcollisionrect(myship,human):
+            pointsawarded = LEDlib.LEDscoreobj(canvas1,x=human.x-7,y=human.y+10,score=bonusscore,colour="yellow",pixelsize=1, charwidth = 8, solid = True, bg = False)
             scoreddisplay.append(pointsawarded)
-            fruit.undraw()
-            enemylist.remove(fruit)
-            score = score + fruit.PointsType
+            human.undraw()
+            humanlist.remove(human)
+            score = score + bonusscore
+            bonusscore = bonusscore + 1000
+            if bonusscore > 5000: bonusscore = 5000
             if score > highscore: 
                 highscore = score
                 displayhighscore.update(highscore)
@@ -264,7 +272,6 @@ def setlevel():
     createplayfield()
     myship.resetposition(STARTX,STARTY)
     score = 0
-    highscore = load_high_score()
     displaylevel.update(LEVELSTART)
     PlayerAlive = True
     myship.dy = 0
