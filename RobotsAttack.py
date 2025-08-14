@@ -15,14 +15,15 @@ current_script_directory = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_script_directory)
 
 # TODO
-# mikey - make SparkScoreObj and move Mikey, etc
-# New font? Look at robotron temp score displays 1000, etc
+#  introduce new enemies
+# 3 men, new man each 2000      divide all scores by 10  so bonus 100,200,300
+
 # teleporters
 # ammo packs?
 # zerg?
 # Jim Raynor?
 # Convert to PyGame, with sound, then GameMaker
-
+# New font? Look at robotron temp score displays 1000, etc
 
 
 # leave Math comments at end of each game
@@ -42,7 +43,7 @@ MAXy = 600
 STARTX = MAXx//2  # start location of human
 STARTY = MAXy//2
 
-LEVELSTART = 0   # change with start keys 1,2,3,...,9
+LEVELSTART = 1   # change with start keys 1,2,3,...,9
 
 mainwin = Tk()
 mainwin.geometry(str(MAXx)+"x"+str(MAXy)) 
@@ -55,6 +56,7 @@ highscore = Highscorelib.load_high_score("highscore.txt")
 PlayerAlive = False
 CanFire = True
 RobotSpeed = 0.2
+HUMANSPEED = 0.3
 
 
 class SplitCharobj: # this object splits a char into two, lasting timealive milliseconds
@@ -211,22 +213,32 @@ def displaytitle():
 def undrawtitle():
     line1text.undraw()
 
+def randyloc():
+    return random.randint(53,MAXy-100)
+
+def randxloc():
+    return random.randint(20,MAXx-20)
+
+
 def createplayfield():
-    for i in range(8):
-      x = random.randint(20,MAXx)
-      y = random.randint(20,MAXy)
+    for i in range(LEVELSTART+4):
+      x = randxloc()
+      y = randyloc()
       myrobot = LEDlib.LEDobj(canvas1,x,y,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "robot")
       myrobot.collisionrect = (0,0,21,25)
       #myrobot.showcollisionrect()
       robotlist.append(myrobot)
-    Mikey = LEDlib.LEDobj(canvas1,100,210,dx = 0,dy = 0,CharPoints=charRobotron2, pixelsize = 2,typestring = "human")
+    Mikey = LEDlib.LEDobj(canvas1,randxloc(),randyloc(),dx = 0,dy = 0,CharPoints=charRobotron2, pixelsize = 2,typestring = "human")
     Mikey.collisionrect = (0,0,12,19)
+    Mikey.dx = -HUMANSPEED
     #Mikey.showcollisionrect()
-    Father = LEDlib.LEDobj(canvas1,100,310,dx = 0,dy = 0,CharPoints=charRobotron3, pixelsize = 2,typestring = "human")
+    Father = LEDlib.LEDobj(canvas1,randxloc(),randyloc(),dx = 0,dy = 0,CharPoints=charRobotron3, pixelsize = 2,typestring = "human")
     Father.collisionrect = (0,0,17,24)
+    Father.dy = HUMANSPEED
     #Father.showcollisionrect()
-    Mother = LEDlib.LEDobj(canvas1,100,410,dx = 0,dy = 0,CharPoints=charRobotron4, pixelsize = 2,typestring = "human")
+    Mother = LEDlib.LEDobj(canvas1,randxloc(),randyloc(),dx = 0,dy = 0,CharPoints=charRobotron4, pixelsize = 2,typestring = "human")
     Mother.collisionrect = (0,0,17,25)
+    Mother.dx = HUMANSPEED
     #Mother.showcollisionrect()
     humanlist.append(Mikey)
     humanlist.append(Father)
@@ -234,7 +246,7 @@ def createplayfield():
 
 
 def eraseplayfield():
-    for itemlist in (enemylist, solidlist, scoreddisplay):
+    for itemlist in (enemylist, solidlist, humanlist, robotlist):
         for item in itemlist:
            item.undraw()
         itemlist.clear()
@@ -253,8 +265,25 @@ def moverobots():
             r.y = r.y - RobotSpeed
         r.draw()
 
+def movehumans():
+    for h in humanlist:
+        h.move()
+        if h.x < 0 : h.dx = -h.dx
+        if h.y < 53 : h.dy = -h.dy
+        if h.x > MAXx-20 : h.dx = -h.dx
+        if h.y > MAXy-100 : h.dy = -h.dy
+        if random.randint(0,100) > 95: 
+            r = random.randint(0,5)
+            if r == 0: h.dx = HUMANSPEED 
+            if r == 1: h.dx = -HUMANSPEED 
+            if r == 2: h.dx = 0 
+            if r == 3: h.dy = HUMANSPEED
+            if r == 4: h.dy = -HUMANSPEED
+            if r == 5: h.dx = 0 
+
+
 def gameloop():
-    global  score, highscore, hitcounter, PlayerAlive, RobotSpeed, bonusscore
+    global  score, highscore, hitcounter, PlayerAlive, RobotSpeed, bonusscore, LEVELSTART
     bulletstoremove = []
     robotstoremove = []
     for bullet in bulletlist:
@@ -306,19 +335,25 @@ def gameloop():
             myship.dx = 0
             myship.dy = 0
             break # exit the for loop
+    if len(robotlist) == 0:
+        LEVELSTART += 1
+        createplayfield
+        setlevel()
     moverobots()
+    movehumans()
     mainwin.after(30,gameloop)
 
 def setlevel():
-    global walls,pointsset,score, highscore, PlayerAlive
+    global walls,pointsset,score, highscore, PlayerAlive, RobotSpeed, bonusscore
     eraseplayfield()
     createplayfield()
     myship.resetposition(STARTX,STARTY)
-    score = 0
     displaylevel.update(LEVELSTART)
     PlayerAlive = True
     myship.dy = 0
     myship.dx = 0
+    RobotSpeed = 0.2
+    bonusscore = 1000
 
 def reload():
     global CanFire
