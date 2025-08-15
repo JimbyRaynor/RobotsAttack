@@ -188,7 +188,9 @@ solidlist = []
 bulletlist = []
 robotlist = []
 humanlist  = []
-      
+liveslist = []
+
+
 displayscore = LEDlib.LEDscoreobj(canvas1,x=210,y=10,score=0,colour="white",pixelsize=3, charwidth = 24,numzeros=5)
 displaytextscore = LEDlib.LEDtextobj(canvas1,x=235,y=35,text="SCORE",colour="yellow",pixelsize = 2, charwidth=14, solid = True)
 
@@ -219,6 +221,21 @@ def randyloc():
 def randxloc():
     return random.randint(20,MAXx-20)
 
+def addship(i):
+    liveslist.append(LEDlib.LEDobj(canvas1,340+i*30,20,dx = 0,dy = 0,CharPoints=charMan, pixelsize = 2,typestring = "human"))
+
+def removeship():
+     global PlayerAlive
+     if len(liveslist) >= 1:
+       lastship = liveslist[len(liveslist)-1]
+       lastship.undraw()
+       liveslist.remove(lastship)
+     else:
+       print("Game Over")
+       PlayerAlive = False
+
+for i in range(2):
+      addship(i)
 
 def createplayfield():
     for i in range(LEVELSTART+4):
@@ -284,6 +301,7 @@ def movehumans():
 
 def gameloop():
     global  score, highscore, hitcounter, PlayerAlive, RobotSpeed, bonusscore, LEVELSTART
+    if not PlayerAlive: return
     bulletstoremove = []
     robotstoremove = []
     for bullet in bulletlist:
@@ -304,8 +322,9 @@ def gameloop():
         bullet.move()
     for myrobot in robotlist:
         if checkcollisionrect(myship,myrobot):
-              print("collision")  
-              PlayerAlive = False
+              removeship()
+              if PlayerAlive:
+                 setlevel()
     for b in bulletstoremove:
            if b in bulletlist: # b could have been added more than once to bulletstoremove, if it hits multiple enemies
              b.undraw()

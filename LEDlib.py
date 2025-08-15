@@ -150,19 +150,28 @@ def ShowColourText(canvas,x,y,colour, mytext, LEDpoints):
 def ShowColourText2(canvas,x,y,colour, mytext, LEDpoints, solid = False, bg = True):
     digits = [ZERO,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE]
     mytext = mytext.upper()
+    AdjustPos = 0
     charactermap = [charA,charB,charC,charD,charE,charF,charG,charH,charI,charJ,charK,charL,charM,charN,charO,charP,charQ,charR,charS,charT,charU,charV,charW,charX,charY,charZ] 
     for i,c in enumerate(mytext):  # i=0 pairs with c = first char in mytext, i = 1 pairs with c = second char, etc
+       if c in ["M","W","V"]:
+           AdjustPos =  AdjustPos + charwidth/8
+       if c in ["I"]:
+           AdjustPos =  AdjustPos - charwidth/8
        if c != ' ':
           if c in "0123456789":
-            createCharBlockColour2(canvas,x+i*charwidth,y,colour,digits[int(c)], LEDpoints, solid = solid, bg = bg)
+            createCharBlockColour2(canvas,x+i*charwidth+AdjustPos,y,colour,digits[int(c)], LEDpoints, solid = solid, bg = bg)
           elif c == "%":
-            createCharBlockColour2(canvas,x+i*charwidth,y,colour,charPercent, LEDpoints, solid = solid, bg = bg)
+            createCharBlockColour2(canvas,x+i*charwidth+AdjustPos,y,colour,charPercent, LEDpoints, solid = solid, bg = bg)
           elif c == ".":
-            createCharBlockColour2(canvas,x+i*charwidth,y,colour,charDot, LEDpoints, solid = solid, bg = bg)
+            AdjustPos = AdjustPos-2*charwidth/8
+            createCharBlockColour2(canvas,x+i*charwidth+AdjustPos,y,colour,charDot, LEDpoints, solid = solid, bg = bg)
           elif c == ":":
-            createCharBlockColour2(canvas,x+i*charwidth,y,colour,charColon, LEDpoints, solid = solid, bg = bg)
+            AdjustPos = AdjustPos-2*charwidth/8
+            createCharBlockColour2(canvas,x+i*charwidth+AdjustPos,y,colour,charColon, LEDpoints, solid = solid, bg = bg)
           elif ord(c)-65 >= 0 and ord(c)-65 < len(charactermap):
-            createCharBlockColour2(canvas,x+i*charwidth,y,colour, charactermap[ord(c)-65], LEDpoints, solid = solid, bg = bg)      
+            createCharBlockColour2(canvas,x+i*charwidth+AdjustPos,y,colour, charactermap[ord(c)-65], LEDpoints, solid = solid, bg = bg)  
+       if c in ["I"]:
+           AdjustPos =  AdjustPos - charwidth/8    
           
 def Erasepoints(canvas,LEDpoints):
     for p in LEDpoints:
