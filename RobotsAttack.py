@@ -15,9 +15,7 @@ current_script_directory = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_script_directory)
 
 # TODO
-# after dying keep same number of enemies and humans
-#  introduce new enemies
-# Pygame implementation
+# Pygame implementation  -  introduce new enemies
 
 
 # teleporters
@@ -370,9 +368,7 @@ def gameloop():
              del r      
     for human in humanlist:
        if checkcollisionrect(myship,human):
-            #pointsawarded = LEDlib.LEDscoreobj(canvas1,x=human.x-7,y=human.y+10,score=bonusscore,colour="yellow",pixelsize=1, charwidth = 8, solid = True, bg = False)
-            tempdisplay = SparkScoreObj(mainwin,canvas1,x=human.x-7,y=human.y+10,score = bonusscore, colour = "red", pixelsize = 1, charwidth = 8, solid = True,bg=False,dx=0,dy=-1,timealive=1000)
-            #scoreddisplay.append(pointsawarded)
+            SparkScoreObj(mainwin,canvas1,x=human.x-7,y=human.y+10,score = bonusscore, colour = "red", pixelsize = 1, charwidth = 8, solid = True,bg=False,dx=0,dy=-1,timealive=1000)
             human.undraw()
             humanlist.remove(human)
             increasescore(bonusscore)
