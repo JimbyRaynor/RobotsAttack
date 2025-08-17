@@ -15,8 +15,10 @@ current_script_directory = os.path.dirname(os.path.abspath(__file__))
 os.chdir(current_script_directory)
 
 # TODO
+# after dying keep same number of enemies and humans
 #  introduce new enemies
-# 3 men, new man each 2000      divide all scores by 10  so bonus 100,200,300
+# Pygame implementation
+
 
 # teleporters
 # ammo packs?
@@ -44,6 +46,8 @@ STARTX = MAXx//2  # start location of human
 STARTY = MAXy//2
 
 LEVELSTART = 1   # change with start keys 1,2,3,...,9
+BONUSMAN = 20000
+BONUSMANSTEP = 20000
 
 mainwin = Tk()
 mainwin.geometry(str(MAXx)+"x"+str(MAXy)) 
@@ -191,14 +195,14 @@ humanlist  = []
 liveslist = []
 
 
-displayscore = LEDlib.LEDscoreobj(canvas1,x=210,y=10,score=0,colour="white",pixelsize=3, charwidth = 24,numzeros=5)
-displaytextscore = LEDlib.LEDtextobj(canvas1,x=235,y=35,text="SCORE",colour="yellow",pixelsize = 2, charwidth=14, solid = True)
+displayscore = LEDlib.LEDscoreobj(canvas1,x=180,y=10,score=0,colour="white",pixelsize=3, charwidth = 24,numzeros=7)
+displaytextscore = LEDlib.LEDtextobj(canvas1,x=227,y=35,text="SCORE",colour="yellow",pixelsize = 2, charwidth=14, solid = True)
 
-displayhighscore = LEDlib.LEDscoreobj(canvas1,x=MAXx-121,y=10,score=highscore,colour="white",pixelsize=3, charwidth = 24,numzeros=5)
-displaytexthighscore = LEDlib.LEDtextobj(canvas1,x=MAXx-105,y=35,text="HISCORE",colour="yellow",pixelsize = 2, charwidth=14, solid = True)
+displayhighscore = LEDlib.LEDscoreobj(canvas1,x=MAXx-171,y=10,score=highscore,colour="white",pixelsize=3, charwidth = 24,numzeros=7)
+displaytexthighscore = LEDlib.LEDtextobj(canvas1,x=MAXx-135,y=35,text="HISCORE",colour="yellow",pixelsize = 2, charwidth=14, solid = True)
 
-dlx = 50
-displaylevel = LEDlib.LEDscoreobj(canvas1,x=MAXx//2+20+dlx,y=10,score=LEVELSTART,colour="white",pixelsize=3, charwidth = 24,numzeros=0)
+dlx = 70
+displaylevel = LEDlib.LEDscoreobj(canvas1,x=MAXx//2+14+dlx,y=10,score=LEVELSTART,colour="white",pixelsize=3, charwidth = 24,numzeros=2)
 displaytextlevel = LEDlib.LEDtextobj(canvas1,x=MAXx//2+dlx,y=35,text="LEVEL",colour="yellow",pixelsize = 2, charwidth=14, solid = True)
 
 LEDpoints = []
@@ -221,8 +225,15 @@ def randyloc():
 def randxloc():
     return random.randint(20,MAXx-20)
 
-def addship(i):
-    liveslist.append(LEDlib.LEDobj(canvas1,340+i*30,20,dx = 0,dy = 0,CharPoints=charMan, pixelsize = 2,typestring = "human"))
+def addship():
+    i = len(liveslist)
+    if i <= 3:
+      liveslist.append(LEDlib.LEDobj(canvas1,350+i*30,10,dx = 0,dy = 0,CharPoints=charMan, pixelsize = 2,typestring = "human"))
+    elif i <= 10:
+      liveslist.append(LEDlib.LEDobj(canvas1,350+(i-4)*10,40,dx = 0,dy = 0,CharPoints=charMan, pixelsize = 1,typestring = "human"))  
+    else:
+      liveslist.append(LEDlib.LEDobj(canvas1,350+60+(i-4)*2,50,dx = 0,dy = 0,CharPoints=charMan, pixelsize = 0.2,typestring = "human"))  
+    
 
 def removeship():
      global PlayerAlive
@@ -235,33 +246,48 @@ def removeship():
        PlayerAlive = False
 
 for i in range(2):
-      addship(i)
+      addship()
 
-def createplayfield():
-    for i in range(LEVELSTART+4):
-      x = randxloc()
-      y = randyloc()
-      myrobot = LEDlib.LEDobj(canvas1,x,y,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "robot")
-      myrobot.collisionrect = (0,0,21,25)
-      #myrobot.showcollisionrect()
-      robotlist.append(myrobot)
+def createMikey():
     Mikey = LEDlib.LEDobj(canvas1,randxloc(),randyloc(),dx = 0,dy = 0,CharPoints=charRobotron2, pixelsize = 2,typestring = "human")
     Mikey.collisionrect = (0,0,12,19)
     Mikey.dx = -HUMANSPEED
-    #Mikey.showcollisionrect()
+    humanlist.append(Mikey)
+    
+def createFather():
     Father = LEDlib.LEDobj(canvas1,randxloc(),randyloc(),dx = 0,dy = 0,CharPoints=charRobotron3, pixelsize = 2,typestring = "human")
     Father.collisionrect = (0,0,17,24)
     Father.dy = HUMANSPEED
-    #Father.showcollisionrect()
+    humanlist.append(Father)
+
+def createMother():
     Mother = LEDlib.LEDobj(canvas1,randxloc(),randyloc(),dx = 0,dy = 0,CharPoints=charRobotron4, pixelsize = 2,typestring = "human")
     Mother.collisionrect = (0,0,17,25)
-    Mother.dx = HUMANSPEED
-    #Mother.showcollisionrect()
-    humanlist.append(Mikey)
-    humanlist.append(Father)
+    Mother.dx = HUMANSPEED 
     humanlist.append(Mother)
 
+def createplayfield():
+    for i in range(LEVELSTART+4):
+        x = randxloc()
+        y = randyloc()
+        myrobot = LEDlib.LEDobj(canvas1,x,y,dx = 0,dy = 0,CharPoints=charRobotron, pixelsize = 2,typestring = "robot")
+        myrobot.collisionrect = (0,0,21,25)
+        #myrobot.showcollisionrect()
+        robotlist.append(myrobot)
+    for i in range(LEVELSTART+1):
+        r = random.randint(0,2)
+        if r == 0: createMikey()
+        if r == 1: createFather()
+        if r == 2: createMother()
 
+def shuffleplayfield():
+    for list in [robotlist, humanlist]:
+       for r in list:
+          r.x = randxloc()
+          r.y = randyloc()
+          r.draw()
+    
+    
 def eraseplayfield():
     for itemlist in (enemylist, solidlist, humanlist, robotlist):
         for item in itemlist:
@@ -299,8 +325,19 @@ def movehumans():
             if r == 5: h.dx = 0 
 
 
+def increasescore(amount):
+    global score, highscore, BONUSMAN
+    score = score + amount
+    if score > highscore: 
+       highscore = score
+       displayhighscore.update(highscore)
+    displayscore.update(score)
+    if score > BONUSMAN:
+        BONUSMAN = BONUSMAN + BONUSMANSTEP
+        addship()
+
 def gameloop():
-    global  score, highscore, hitcounter, PlayerAlive, RobotSpeed, bonusscore, LEVELSTART
+    global  score, highscore, hitcounter, PlayerAlive, RobotSpeed, bonusscore, LEVELSTART, BONUSMAN
     if not PlayerAlive: return
     bulletstoremove = []
     robotstoremove = []
@@ -314,11 +351,7 @@ def gameloop():
               robotstoremove.append(myrobot)
               bulletstoremove.append(bullet) 
               RobotSpeed = RobotSpeed + 0.2 
-              score = score + 10
-              if score > highscore: 
-                highscore = score
-                displayhighscore.update(highscore)
-              displayscore.update(score)   
+              increasescore(10) 
         bullet.move()
     for myrobot in robotlist:
         if checkcollisionrect(myship,myrobot):
@@ -342,13 +375,9 @@ def gameloop():
             #scoreddisplay.append(pointsawarded)
             human.undraw()
             humanlist.remove(human)
-            score = score + bonusscore
+            increasescore(bonusscore)
             bonusscore = bonusscore + 1000
             if bonusscore > 5000: bonusscore = 5000
-            if score > highscore: 
-                highscore = score
-                displayhighscore.update(highscore)
-            displayscore.update(score)
     for solid in solidlist:
          if checkcollisionrect(myship,solid): 
             myship.dx = 0
@@ -358,14 +387,20 @@ def gameloop():
         LEVELSTART += 1
         createplayfield
         setlevel()
+    l = len(robotlist)
+    if l <= 4:
+        RobotSpeed = 5-l
     moverobots()
     movehumans()
     mainwin.after(30,gameloop)
 
 def setlevel():
     global walls,pointsset,score, highscore, PlayerAlive, RobotSpeed, bonusscore
-    eraseplayfield()
-    createplayfield()
+    if len(robotlist) == 0 : # start a new level, have not died during level
+       eraseplayfield()
+       createplayfield()
+    else:
+       shuffleplayfield() # continue level after dying
     myship.resetposition(STARTX,STARTY)
     displaylevel.update(LEVELSTART)
     PlayerAlive = True
